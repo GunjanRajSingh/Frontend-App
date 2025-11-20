@@ -95,7 +95,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.ACR_LOGIN_SERVER }}/ReactTodoUI:latest
+          tags: ${{ env.ACR_LOGIN_SERVER }}/reacttodoui:latest
 
       # Trivy Image Scan
 #       - name: Trivy Image Scan
