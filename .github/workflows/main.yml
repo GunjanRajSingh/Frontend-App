@@ -50,36 +50,36 @@ jobs:
         run: npm install
 
       # SonarQube scan
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=starbucks
-            -Dsonar.projectName=starbucks
+      # - name: SonarQube Scan
+      #   uses: SonarSource/sonarqube-scan-action@v4
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      #   with:
+      #     args: >
+      #       -Dsonar.projectKey=starbucks
+      #       -Dsonar.projectName=starbucks
 
-      # Wait for SonarQube Quality Gate
-      - name: Wait for SonarQube Quality Gate
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        with:
-          pollingTimeoutSec: 600
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # # Wait for SonarQube Quality Gate
+      # - name: Wait for SonarQube Quality Gate
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
+      #   with:
+      #     pollingTimeoutSec: 600
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      #  Install Trivy   
-      - name: Aqua Security Trivy
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          # ignore-unfixed: 'false'
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
-          format: 'table'
-          output: 'trivyfs.txt'
+      # #  Install Trivy   
+      # - name: Aqua Security Trivy
+      #   uses: aquasecurity/trivy-action@0.33.1
+      #   with:
+      #     scan-type: 'fs'
+      #     scan-ref: '.'
+      #     # ignore-unfixed: 'false'
+      #     vuln-type: 'os,library'
+      #     severity: 'HIGH,CRITICAL'
+      #     format: 'table'
+      #     output: 'trivyfs.txt'
 
       # Login to ACR
       - name: Azure ACR Login
@@ -95,22 +95,22 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.ACR_LOGIN_SERVER }}/starbucks:latest
+          tags: ${{ env.ACR_LOGIN_SERVER }}/ReactTodoUI:latest
 
       # Trivy Image Scan
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.ACR_LOGIN_SERVER }}/starbucks:latest
-          format: "table"
-          severity: "CRITICAL,HIGH"
-          exit-code: 0               
-          ignore-unfixed: true
-          vuln-type: "os,library"
-          output: 'trivyimage.txt'
+#       - name: Trivy Image Scan
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: ${{ env.ACR_LOGIN_SERVER }}/starbucks:latest
+#           format: "table"
+#           severity: "CRITICAL,HIGH"
+#           exit-code: 0               
+#           ignore-unfixed: true
+#           vuln-type: "os,library"
+#           output: 'trivyimage.txt'
 
 
-# --------------------- DEPLOY TO AKS & EMAIL NOTIFICATION ---------------------
+# # --------------------- DEPLOY TO AKS & EMAIL NOTIFICATION ---------------------
 
   Deploy-:
     needs: Build-Scan-Push
@@ -137,11 +137,11 @@ jobs:
           az account set --subscription ${{ env.SUBSCRIPTION_ID }}
           az aks get-credentials --resource-group ${{ env.AKS_RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER_NAME }} --overwrite-existing
           # git clone https://github.com/GunjanRajSingh/StarBucks-Deployment.git
-          cd StarBuck-Manifest
-          kubectl create ns starbucks-ns
+          cd Manifast
+          kubectl create ns ReactTodoUI-ns
           kubectl apply -f .
-          kubectl get pods -n starbucks-ns
-          kubectl get ingress -n starbucks-ns -owide
+          kubectl get pods -n ReactTodoUI-ns
+          kubectl get ingress -n ReactTodoUI-ns -owide
 
       #  Email Notification
       - name: Send Email Notification
