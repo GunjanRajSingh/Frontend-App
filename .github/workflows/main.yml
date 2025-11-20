@@ -152,7 +152,7 @@ jobs:
           server_port: 465
           username: ${{ secrets.EMAIL_USER }}
           password: ${{ secrets.EMAIL_PASS }}
-          subject: "GitHub Actions Build ${{ job.status }}: Amazon CI/CD #${{ github.run_number }}"
+          subject: "GitHub Actions Build ${{ job.status }}: ReactTodoUI CI/CD #${{ github.run_number }}"
           html_body: |
             <p>Build: ${{ job.status }}</p>
             <p>Repository: ${{ github.repository }}</p>
