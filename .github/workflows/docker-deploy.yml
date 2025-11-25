@@ -54,6 +54,7 @@ jobs:
           args: >
             -Dsonar.projectKey=ReactTodoUIMonolith
             -Dsonar.projectName=ReactTodoUIMonolith
+      
             
       # Install dependencies
       - name: Install dependencies
@@ -67,5 +68,22 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # squ_30cf71e1b5685b3810d297dd9bbeff56b9c3f434
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #http://20.9.141.144:9000
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "ReactTodoUIMonolith"
+          scan: "./"
+          format: "ALL"
+          out: "./reports"
+
+      - name: Upload OWASP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/
+
+
+      
 
   
