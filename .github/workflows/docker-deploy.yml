@@ -39,11 +39,18 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # gitleaks secret scan
+      # - name: Run Security Scan
+      #   uses: cloudon-one/git-security-scanner@v2
+      #   with:
+      #     github_token: ${{ secrets.GH_TOKEN }}
+      #     fail_on_critical: true
+
       - name: Run Security Scan
-        uses: cloudon-one/git-security-scanner@v2
+        uses: cloudon-one/git-security-scanner-public@v2
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           fail_on_critical: true
+
           
       - name: OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
