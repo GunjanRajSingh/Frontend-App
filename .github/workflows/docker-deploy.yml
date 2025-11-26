@@ -180,7 +180,7 @@ jobs:
           az account set --subscription ${{ env.SUBSCRIPTION_ID }}
           az aks get-credentials --resource-group ${{ env.AKS_RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER_NAME }} --overwrite-existing
           # git clone https://github.com/GunjanRajSingh/reacttodouimonolith-Deployment.git
-          cd reacttodouimonolith-manifast
+          cd  manifast
           kubectl create ns reacttodouimonolith-ns
           kubectl apply -f .
           kubectl get pods -n reacttodouimonolith-ns
