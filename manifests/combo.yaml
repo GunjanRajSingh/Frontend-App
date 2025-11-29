@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: todoapp
-        image: aksclsuterregistry.azurecr.io/todoapp:${TAG}
+        image: aksclsuterregistry.azurecr.io/todoapp:latest
  #aksclsuterregistry.azurecr.io/todoapp:47
         ports:
         - containerPort: 80
