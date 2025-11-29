@@ -130,7 +130,7 @@ jobs:
   #         path: trivyimage.txt
 
   Deploy:
-    needs: Build-Scan-Push
+    # needs: Build-Scan-Push
     runs-on: ubuntu-latest
     steps:
 
