@@ -4,7 +4,7 @@ import { Button, TextField, Container, Typography, Grid, Card, CardContent, Icon
 import { Delete } from '@mui/icons-material';
 import { Box } from '@mui/material';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://backend-apps.backend.svc.cluster.local:8000';
 
 const backgroundImage = process.env.PUBLIC_URL + '/background.jpg';
 
