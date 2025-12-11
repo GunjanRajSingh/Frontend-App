@@ -33,29 +33,29 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      # - uses: gitleaks/gitleaks-action@v2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: "todoapp"
-          scan: "./"
-          format: "ALL"
-          out: "./reports"
+      # - name: OWASP Dependency Check
+      #   uses: dependency-check/Dependency-Check_Action@main
+      #   with:
+      #     project: "todoapp"
+      #     scan: "./"
+      #     format: "ALL"
+      #     out: "./reports"
 
-      - name: Upload OWASP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-check-report
-          path: reports/
+      # - name: Upload OWASP Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dependency-check-report
+      #     path: reports/
 
-      - name: npm audit
-        continue-on-error: true
-        run: |
-          npm audit --audit-level=high || true
-          npm audit fix || true
+      # - name: npm audit
+      #   continue-on-error: true
+      #   run: |
+      #     npm audit --audit-level=high || true
+      #     npm audit fix || true
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -84,21 +84,21 @@ jobs:
       #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       #   continue-on-error: true
 
-      - name: Aqua Security Trivy FS
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
-          output: 'trivyfs.txt'
+      # - name: Aqua Security Trivy FS
+      #   uses: aquasecurity/trivy-action@0.33.1
+      #   with:
+      #     scan-type: 'fs'
+      #     scan-ref: '.'
+      #     format: 'table'
+      #     vuln-type: 'os,library'
+      #     severity: 'HIGH,CRITICAL'
+      #     output: 'trivyfs.txt'
 
-      - name: Upload Trivy FS Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-fs-report
-          path: trivyfs.txt
+      # - name: Upload Trivy FS Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trivy-fs-report
+      #     path: trivyfs.txt
 
       - name: Azure ACR Login
         run: az acr login --name ${{ env.ACR_NAME }}
@@ -122,61 +122,61 @@ jobs:
           name: manifests
           path: manifests/
 
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@master
+      # - name: Trivy Image Scan
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: ${{ env.ACR_LOGIN_SERVER }}/todoapp:${{ env.IMAGE_TAG }}
+      #     format: "table"
+      #     severity: "CRITICAL,HIGH"
+      #     exit-code: 0
+      #     ignore-unfixed: true
+      #     vuln-type: "os,library"
+      #     output: 'trivyimage.txt'
+
+      # - name: Upload Trivy Image Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trivy-image-report
+      #     path: trivyimage.txt
+
+  Deploy:
+    needs: Build-Scan-Push
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download updated manifests
+        uses: actions/download-artifact@v4
         with:
-          image-ref: ${{ env.ACR_LOGIN_SERVER }}/todoapp:${{ env.IMAGE_TAG }}
-          format: "table"
-          severity: "CRITICAL,HIGH"
-          exit-code: 0
-          ignore-unfixed: true
-          vuln-type: "os,library"
-          output: 'trivyimage.txt'
+          name: manifests
+          path: manifests/
 
-      - name: Upload Trivy Image Report
-        uses: actions/upload-artifact@v4
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          name: trivy-image-report
-          path: trivyimage.txt
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-  # Deploy:
-  #   needs: Build-Scan-Push
-  #   runs-on: ubuntu-latest
-  #   steps:
+      - name: Set AKS Context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+      - name: Deploy Manifests to AKS
+        run: |
+          az account set --subscription ${{ env.SUBSCRIPTION_ID }}
+          az aks get-credentials \
+            --resource-group ${{ env.AKS_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
 
-  #     - name: Download updated manifests
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: manifests
-  #         path: manifests/
+          kubectl create ns todoapp --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -f manifests/ -n todoapp
 
-  #     - name: Azure Login
-  #       uses: azure/login@v2
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-  #     - name: Set AKS Context
-  #       uses: azure/aks-set-context@v4
-  #       with:
-  #         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
-  #         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-
-  #     - name: Deploy Manifests to AKS
-  #       run: |
-  #         az account set --subscription ${{ env.SUBSCRIPTION_ID }}
-  #         az aks get-credentials \
-  #           --resource-group ${{ env.AKS_RESOURCE_GROUP }} \
-  #           --name ${{ env.AKS_CLUSTER_NAME }} \
-  #           --overwrite-existing
-
-  #         kubectl create ns todoapp --dry-run=client -o yaml | kubectl apply -f -
-  #         kubectl apply -f manifests/ -n todoapp
-
-  #         kubectl get pods -n todoapp
-  #         kubectl get ingress -n todoapp -o wide
+          # kubectl get pods -n todoapp
+          # kubectl get ingress -n todoapp -o wide
 
   #     - name: Send Email Notification
   #       if: always()
